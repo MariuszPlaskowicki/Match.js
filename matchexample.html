@@ -1,0 +1,55 @@
+<html>
+ <head>
+  <script src="js/jquery-1.6.2.min.js"></script>
+  <script src="js/jquery-ui-1.8.16.custom.min.js"></script>
+  <!--[if IE]><script type="text/javascript" src="js/excanvas.js"></script><![endif]-->
+  <script src="js/match.js"></script>
+  <script type="application/x-javascript">
+        $(document).ready(function(){
+            
+            
+           $("#match").match({
+            radius:7,
+            responses: [{ id: 0, text: "jQuery",x:0,y:0,width:0,height:0 },
+                       { id: 1, text: "REST",x:0,y:0,width:0,height:0 }, 
+                        { id: 11, text: "Knockout.js",x:0,y:0,width:0,height:0 },
+                       { id: 11, text: "RavenDB",x:0,y:0,width:0,height:0 }, 
+                        { id: 11, text: "Backbone.js",x:0,y:0,width:0,height:0 }, 
+                       { id: 2, text: "Asp.mvc",x:0,y:0,width:0,height:0}],
+            options: [
+                      { id: 1, text: "Server",x:0,y:0,width:0,height:0  }, 
+                      { id: 0, text: "Client",x:0,y:0,width:0,height:0  },
+                      { id: 6, text: "Database",x:0,y:0,width:0,height:0}]
+            });
+           
+           
+            
+        });
+        
+        function getVals()
+        {
+         var res = $("#match").match("getValues");
+         $("#results").html("");
+         for(var a=0;a<res.length;a++)
+         {
+             var item = res[a];
+             $("#results").append("<div>'"+ item.question.text+"' matched with '"+item.response.text+"'</div>");
+             console.log(item);
+         }
+        }
+        function Clear()
+        {
+         $("#match").match("clear");
+        }
+  </script>
+  
+  	
+ </head>
+ <body >
+   <span id="match" ></span>
+   <div></div>
+   <span id="results"></span>
+   <button onclick="getVals()">Results</button>
+   <button onclick="Clear()">Clear</button>
+ </body>
+</html>
