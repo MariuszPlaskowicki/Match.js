@@ -53,6 +53,24 @@
                     maxWidth = item.width;
                 item.height = 28;
             }
+            
+            for (var a = 0; a < this.options.joins.length; a++) {
+                var item = this.options.joins[a];
+                var question = jQuery.grep(this.options.options, function(value) {
+                    return value.id == item.question.id;
+                });
+                
+                var response = jQuery.grep(this.options.responses, function(value) {
+                    return value.id == item.response.id;
+                });
+
+                if(question.length==1 && response.length==1)
+                {
+                    item.question = question[0];
+                    item.response = response[0];
+                }
+            }
+                
             for (var a = 0; a < this.options.responses.length; a++) {
                 var item = this.options.responses[a];
                 item.x = this.options.width - maxWidth - 10;
@@ -103,7 +121,6 @@
                 if( this.currentjoin != null)
                 {
                     this._renderJoin(this.currentjoin,ctx);
-                    
                 }
                
             }
