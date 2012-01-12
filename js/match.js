@@ -16,10 +16,13 @@
         },
         current:null,
         currentjoin:null,
+        currentXMouse:0,
+        currentYMouse:0,
         down:false,
         _create: function() {
             this.options = $.extend(true, {}, this.defaults, this.options);
-            this.options.joins = Array();
+            if( this.options.joins == null)
+                this.options.joins = Array();
             var id = this.element.attr("id");
             this.element.append("<canvas id='canvas" + id + "' width=" + this.options.width + " height=" + this.options.height + "></canvas>");
             var canvas = document.getElementById("canvas" + id);
@@ -64,7 +67,6 @@
             $(canvas).mouseup(__bind(function(event) {
                 return this.Mouseup(event.pageX, event.pageY);
             }, this));
-          
             
             $(canvas).mousemove(__bind(function(event) {
                 return this.Mousemove(event.pageX, event.pageY);
@@ -194,11 +196,74 @@
             ctx.bezierCurveTo(controlX1, controlY1, controlX2,controlY2, endX, endY);
 
             ctx.lineWidth = 1;
-            ctx.strokeStyle = "black"; // line color
+            if(item.over == true)
+                ctx.strokeStyle = "red"; // line color
+            else
+                ctx.strokeStyle = "black"; // line color
 
             ctx.stroke();
             ctx.closePath();
             
+        },
+        _detectJoin: function(item,ctx,x,y)
+        {
+            ctx.beginPath();
+            var bendmod = this.options.bendmodidicator;
+            var controlX1,controlY1,controlX2,controlY2;
+            controlX1 = controlY1 = controlX2 = controlY2 = 0;
+            if(item.question != null)
+                ctx.moveTo(item.question.x + item.question.width , item.question.y+(item.question.height/2));
+            else
+                ctx.moveTo(item.x  , item.y);
+            
+            if(item.question != null)
+            {
+                controlX1 = item.question.x + item.question.width + bendmod;
+                controlY1 = item.question.y + (item.question.height/2);
+            }
+            else
+            {
+                controlX1 = item.x + bendmod;
+                controlY1 = item.y;
+            }
+            if(item.response != null)
+            {
+                controlX2 = item.response.x  - bendmod;
+                controlY2 = item.response.y + (item.response.height/2);
+            }
+            else
+            {
+                controlX2 = item.x - bendmod;
+                controlY2 = item.y;
+            }
+            var endX,endY;
+            endX = endY = 0;
+            if(item.response != null)
+            {
+                endX = item.response.x;
+                endY = item.response.y + (item.response.height/2);
+            }
+            else
+            {
+                endX = item.x;
+                endY = item.y;
+            }
+                
+            ctx.bezierCurveTo(controlX1, controlY1, controlX2,controlY2, endX, endY);
+            ctx.lineWidth = 1;
+            ctx.strokeStyle = "black"; // line color
+            
+            if (ctx.isPointInPath(x,y-7))
+            {
+                ctx.closePath();
+                return true;
+            }
+            else
+            {
+                 ctx.closePath();
+                 return false;
+            }
+                
         },
         _setOption: function(key, value) {
 
@@ -212,23 +277,40 @@
         Mousemove: function(x, y) {
             var current, pos, posx, posy;
             
+            //track the position of the cursor 
+            var id = this.element.attr("id");
+            pos = $("#canvas" + id).offset();
+            posx = x - pos.left;
+            posy = y - pos.top;
+            this.currentXMouse = posx;
+            this.currentYMouse = posy;
+            var mouseOver = false;    
             if(this.down)
             {
-                
-                var id = this.element.attr("id");
-                pos = $("#canvas" + id).offset();
-            
-                posx = x - pos.left;
-                posy = y - pos.top;
-                 
                 if(this.currentjoin != null)
-                    {
-                        this.currentjoin.x = posx;
-                        this.currentjoin.y = posy;
-                        this.refresh();
-                    }
-                    
+                {
+                    this.currentjoin.x = posx;
+                    this.currentjoin.y = posy;
+                    //this.refresh();
+                }
             }
+            else
+            {
+                var id = this.element.attr("id");
+                var canvas = document.getElementById("canvas" + id);
+                if (canvas.getContext) {
+                    var ctx = canvas.getContext("2d");
+                     for (var a = 0; a < this.options.joins.length; a++) {
+                        var item = this.options.joins[a];
+                        item.over = this._detectJoin(item,ctx,x,y);
+                        if(item.over)
+                            mouseOver = true;
+                    }
+                }
+            }
+            //if(mouseOver)
+            this.refresh();
+            
             return this;
         },
         Mouseup: function(x,y) {
@@ -265,7 +347,25 @@
             
             posx = x - pos.left;
             posy = y - pos.top;
-          
+                    
+            var itemToRemove = null;
+            for (var a = 0; a < this.options.joins.length; a++) {
+                var item = this.options.joins[a];
+                if(item.over)
+                    itemToRemove = item;
+            }
+            if(itemToRemove != null)
+            {
+                console.log( this.options.joins.length);
+                this.options.joins = jQuery.grep(this.options.joins, function(value) {
+                    console.log(value)
+                    return value.over == false;
+                });
+                console.log( this.options.joins.length);
+
+            }
+                //this.options.joins.remove(itemToRemove);
+            
             this.currentjoin = this._joinItems(null,null);
             current = this.GetSelectedItem(posx, posy,this.options.options);
             if(current == null)
@@ -283,6 +383,7 @@
                 this.down = true;
             }
            
+          
             return this;
         },
          GetSelectedItem: function(x, y, options) {
@@ -342,5 +443,3 @@ CanvasRenderingContext2D.prototype.roundRect = function(sx, sy, ex, ey, r) {
     return this.closePath();
   }
   
-  
-
