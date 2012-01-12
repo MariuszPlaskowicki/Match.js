@@ -296,7 +296,6 @@
             }
             else
             {
-                console.log("moving over the x="+posx+" and y="+posy);
                 var id = this.element.attr("id");
                 var canvas = document.getElementById("canvas" + id);
                 if (canvas.getContext) {
@@ -357,13 +356,9 @@
             }
             if(itemToRemove != null)
             {
-                console.log( this.options.joins.length);
                 this.options.joins = jQuery.grep(this.options.joins, function(value) {
-                    console.log(value)
                     return value.over == false;
                 });
-                console.log( this.options.joins.length);
-
             }
                 //this.options.joins.remove(itemToRemove);
             
