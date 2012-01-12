@@ -253,7 +253,7 @@
             ctx.lineWidth = 1;
             ctx.strokeStyle = "black"; // line color
             
-            if (ctx.isPointInPath(x,y-7))
+            if (ctx.isPointInPath(x,y))
             {
                 ctx.closePath();
                 return true;
@@ -296,13 +296,14 @@
             }
             else
             {
+                console.log("moving over the x="+posx+" and y="+posy);
                 var id = this.element.attr("id");
                 var canvas = document.getElementById("canvas" + id);
                 if (canvas.getContext) {
                     var ctx = canvas.getContext("2d");
                      for (var a = 0; a < this.options.joins.length; a++) {
                         var item = this.options.joins[a];
-                        item.over = this._detectJoin(item,ctx,x,y);
+                        item.over = this._detectJoin(item,ctx,posx,posy);
                         if(item.over)
                             mouseOver = true;
                     }
